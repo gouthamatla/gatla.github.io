@@ -4,5 +4,3 @@ title: Test
 permalink: /Test/
 ---
 
-
-A test page
