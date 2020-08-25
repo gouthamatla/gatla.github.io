@@ -1,0 +1,74 @@
+I"7<p>I am a final year PhD sudent in Prof. Jorger Ferrer lab at CRG. My PhD is focussed on human genome regulation and Type-2 Diabetes.</p>
+
+<p>High level understanding of human genome function at various layers and its regulation. Experience in integrative analysis of over 30TB of various human genomics data sets like RNA/CAGE/ATAC/ChIP-Seq, “Hi-C” like and single-cell genomics data to understand genome regulation. Experience in analyzing large scale genetic data to understand the role of common genetic variants in transcriptional and post transcriptional gene regulation and its implications in human disease.</p>
+
+<p><a href="https://scholar.google.co.uk/citations?user=9dxqSIEAAAAJ&amp;hl=en">Google scholar</a></p>
+
+<h3><b>Education:</b></h3>
+<ul>
+	<li> Doctoral student in Biomedicine. University of Barcelona. June 2016-Present
+		<ul>
+        	<li>Dissecting genetic regulatory mechanisms in human pancreatic islets to gain insights into type 2 diabetes pathophysiology.</li>	
+			<li>Center for Genomic Regulation, Barcelona, Spain. Regulatory genomics and diabetes Group led by Prof. Jorge Ferrer.</li>
+		</ul>
+	</li>
+
+    <li>M.S (Pharmacoinformatics) (2010-2012)
+        <ul>
+        	<li>National Institute of Pharmaceutical Education and Research, Kolkata. India.</li>
+        </ul>
+    </li>
+    
+    <li>Bachelor of Pharmacy (2008-2010)
+    	<ul>
+    		<li>Kakatiya University, Warangal. India.</li>
+    	</ul>
+    </li>
+
+</ul>
+
+<h3><b>Work Experience:</b></h3>
+<ul>
+    <li>Research collaborator. Imperial College London. 05/2015-Present.
+        <ul>
+        <li>Department of Medicine, Hammersmith hospital led by Prof. Jorge Ferrer.</li>
+        </ul>
+    </li>
+    
+    <li>Marie Curie Early Stage Researcher. 05/2015 – 06/2018
+        <ul>
+        <li>Genomic Programming of Beta Cells and Diabetes lab lead by Prof. Jorge Ferrer. IDIBAPS, Hospital Clinic, Barcelona, Spain.</li>
+        </ul>
+    <li>
+    <li>Consultant - Bioinformatics. 01/2015 – 04/2015
+        <li>Ecology and Evolution group, National Centre for Biological Science (NCBS), Bangalore, India.</li>
+    <li>Bioinformatics Associate. 10/2013 –12/2014
+        <li>Centre for Cellular and Molecular Platforms, National Centre for Biological Science, Bangalore, India.</li>
+    </li>
+    <li>Application Associate. 05/2012 –10/2013
+        <li>Agilent GeneSpring and AVADIS NGS, Strand Life Sciences, Bangalore, India.</li>
+    </li>
+&lt;/ul&gt;
+Data analysis skills:
+    • Python (OOP): Data manipulation, statistics and data visualization.
+        ◦ Pandas, Scipy, Scikit-learn, Matplotlib and Seaborn.
+    • R: Data manipulation, statistics and data visualization.
+        ◦ Dplyr, r-base and ggplot2
+    • Shell scripting and using HPC systems.
+Multi-Omics data analysis skills:
+    • Gene expression and Chromatin data analysis:
+        ◦ Exploratory data analysis, differential gene expression and downstream functional enrichment analysis. Inferring Co-expression networks.
+        ◦ Peak calling and differential accessibility analysis. Motif enrichment, de-novo motif discovery and TF Foot printing.
+    • “Hi-C” like data analysis:
+        ◦ Alignments, loop calling (interaction calling) and differential interaction analysis. Integration of Hi-C data with gene expression, chromatin and genetic data to gain biological insights via 3D genome.
+    • Genetic data analysis:
+        ◦ QTL analysis from large scale RNA-Seq (eQTLs) and chromatin data (hQTLs). Allele-specific gene expression and chromatin analysis.
+        ◦ Integrating QTL data with GWAS data to gain insights into disease risk loci.
+        ◦ Identifying causal variants using genetic fine mapping approaches and deep-learning based in-silico functional assessment tools like DeepSea, Seqweaver, DeepRipe, SpliceAI etc.
+        ◦ Transcriptome Wide Association Studies (TWAS) and Colocalization analysis to infer candidate effector transcripts in GWAS loci.
+    • Single cell genomics data analysis:
+        ◦ scRNA analysis. QC, clustering, cell-type annotations, data integration, differential expression analysis and inferring gene regulatory networks.
+        ◦ scATAC analysis. Peak calling/quantifications, cell-type annotations based on promoter accessibility and integration with scRNA data. Peak co-accessibility analysis to infer regulatory interactions.
+
+</li></li></li></ul>
+:ET

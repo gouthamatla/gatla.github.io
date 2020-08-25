@@ -30,7 +30,7 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/Test/">Test</a></div>
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
       </nav></div>
 </header>
 <main class="page-content" aria-label="Content">
@@ -11833,6 +11833,34 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>eQTL analysis is basically associating a genetic variant with a gene expression given that you have measured gene expression and genotypes (Arrays or by WGS) from several individuals.
+Usually it requires a decent sample size around 70 samples. You can still call QTLs with sample size as low as 20 samples, but that might not have statistical power. GTEx establushed a sample size of 70 to have decent results from QTL analysis.</p>
+<p>What you need is basically:</p>
+
+<pre><code>A Normalized Gene expression file.
+
+Correspondin genotypes.
+
+</code></pre>
+<p><strong>The basic workflow is :</strong></p>
+
+<pre><code>1. Gene expression data is normalized (TPM/FPKM etc).
+
+2. The normalized gene expression data might have lot of variation, both technical and biological. As we are intrested only on variation caused by genetic effects, we will remove any non-genetic variation.
+
+3. This can be achived if you have all the metadata (covariates) that might have induced variation in samples. As we usually dont have, we could just use Principle componenents that capture the variation across samples and use the PCs as covariates while calling QTLs. There are other methods that capture technical and unwanted variation like PEER.
+
+4. Once we have normalized gene expression and PCs calculated, we can proceed for QTL association.
+
+5. As with the gene expression, the genotypes also have some technical variation that might interfere with the QTL association. We could calculate the PCs on genotypes, referred as genetic PCs and merge with gene expression PCs and perform QTL association. </code></pre>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <p>We will be using gene-expression and genetic data from 462 lymphoblastoid cell lines RNA-Seq data from 1000 Genomes project. Both the gene expression and genotypes ara available without dbGap access.</p>
 <p>The data is available at <a href="https://www.ebi.ac.uk/arrayexpress/experiments/E-GEUV-1/">https://www.ebi.ac.uk/arrayexpress/experiments/E-GEUV-1/</a></p>
 <p><strong>Abstract says:</strong><br>
@@ -11854,7 +11882,7 @@ lymphoblastoid cell lines of 462 individuals from the 1000 Genomes Project, the 
 <pre><code>wget https://www.ebi.ac.uk/arrayexpress/files/E-GEUV-1/E-GEUV-1.sdrf.txt</code></pre>
 <p>Genotypes (For practical reasons, just get chromosome 1)</p>
 
-<pre><code>wget https://www.ebi.ac.uk/arrayexpress/files/E-GEUV-`/GEUVADIS.chr1.PH1PH2_465.IMPFRQFILT_BIALLELIC_PH.annotv2.genotypes.vcf.gz</code></pre>
+<pre><code>wget https://www.ebi.ac.uk/arrayexpress/files/E-GEUV-1/GEUVADIS.chr1.PH1PH2_465.IMPFRQFILT_BIALLELIC_PH.annotv2.genotypes.vcf.gz</code></pre>
 
 </div>
 </div>
@@ -12794,7 +12822,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_metaData</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -12810,7 +12838,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[17]:</div>
+<div class="prompt output_prompt">Out[15]:</div>
 
 
 
@@ -12977,7 +13005,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_metaData</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Comment[SUBMITTED_FILE_NAME]&quot;</span><span class="p">,</span><span class="s2">&quot;Comment[ENA_RUN]&quot;</span><span class="p">,</span><span class="s2">&quot;Comment[FASTQ_URI]&quot;</span><span class="p">,</span><span class="s2">&quot;Scan Name&quot;</span><span class="p">],</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -12999,7 +13027,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_metaData</span> <span class="o">=</span> <span class="n">gene_ex_metaData</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
@@ -13016,7 +13044,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[19]:</div>
+<div class="prompt output_prompt">Out[17]:</div>
 
 
 
@@ -13043,7 +13071,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_metaData</span> <span class="o">=</span> <span class="n">gene_ex_metaData</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gene_ex</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
@@ -13056,7 +13084,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">gene_ex_metaData</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">gene_ex</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
@@ -13072,7 +13100,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[21]:</div>
+<div class="prompt output_prompt">Out[19]:</div>
 
 
 
@@ -13101,7 +13129,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="k">import</span> <span class="n">PCA</span>
@@ -13126,7 +13154,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">gene_ex_filt_pca</span><span class="p">))</span>
@@ -13167,7 +13195,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_pca</span><span class="o">.</span><span class="n">components_</span>
@@ -13183,7 +13211,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[24]:</div>
+<div class="prompt output_prompt">Out[22]:</div>
 
 
 
@@ -13196,12 +13224,12 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
        [ 0.02518342,  0.06336839, -0.00296203, ..., -0.05569223,
         -0.0005004 , -0.03669231],
        ...,
-       [-0.00861298,  0.03254172, -0.00632077, ..., -0.066669  ,
-         0.06024235,  0.08781382],
-       [-0.01533264,  0.02761705,  0.12507065, ...,  0.0440614 ,
-         0.01962965,  0.00520688],
-       [ 0.02570559,  0.01944044, -0.06773101, ..., -0.05971877,
-         0.04001106,  0.01426707]])</pre>
+       [-0.00861657,  0.03253982, -0.00632418, ..., -0.06666697,
+         0.06024863,  0.08782403],
+       [-0.01533937,  0.02760053,  0.12505185, ...,  0.04407694,
+         0.01962084,  0.00520635],
+       [ 0.02571753,  0.019377  , -0.06779408, ..., -0.05969701,
+         0.04007226,  0.01425574]])</pre>
 </div>
 
 </div>
@@ -13221,7 +13249,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_PCs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gene_ex_filt_pca</span><span class="o">.</span><span class="n">components_</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">gene_ex_filt</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PC_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">16</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
@@ -13234,7 +13262,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_PCs</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -13250,7 +13278,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[26]:</div>
+<div class="prompt output_prompt">Out[24]:</div>
 
 
 
@@ -13301,13 +13329,13 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
       <td>-0.019014</td>
       <td>-0.009849</td>
       <td>-0.038982</td>
-      <td>0.007620</td>
+      <td>0.007621</td>
       <td>-0.017875</td>
-      <td>0.044807</td>
-      <td>0.013254</td>
-      <td>-0.008613</td>
-      <td>-0.015333</td>
-      <td>0.025706</td>
+      <td>0.044806</td>
+      <td>0.013256</td>
+      <td>-0.008617</td>
+      <td>-0.015339</td>
+      <td>0.025718</td>
     </tr>
     <tr>
       <th>HG00097</th>
@@ -13320,12 +13348,12 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
       <td>0.005563</td>
       <td>-0.044977</td>
       <td>-0.050277</td>
-      <td>0.016589</td>
-      <td>0.002686</td>
-      <td>-0.001587</td>
-      <td>0.032542</td>
-      <td>0.027617</td>
-      <td>0.019440</td>
+      <td>0.016590</td>
+      <td>0.002688</td>
+      <td>-0.001588</td>
+      <td>0.032540</td>
+      <td>0.027601</td>
+      <td>0.019377</td>
     </tr>
     <tr>
       <th>HG00099</th>
@@ -13338,12 +13366,12 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
       <td>-0.032630</td>
       <td>0.051308</td>
       <td>0.218681</td>
-      <td>-0.096277</td>
+      <td>-0.096276</td>
       <td>0.098449</td>
-      <td>0.041664</td>
-      <td>-0.006321</td>
-      <td>0.125071</td>
-      <td>-0.067731</td>
+      <td>0.041658</td>
+      <td>-0.006324</td>
+      <td>0.125052</td>
+      <td>-0.067794</td>
     </tr>
   </tbody>
 </table>
@@ -13367,7 +13395,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_PCs</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;PC_1&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;PC_2&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
@@ -13387,7 +13415,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[27]:</div>
+<div class="prompt output_prompt">Out[25]:</div>
 
 
 
@@ -13429,7 +13457,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_PCs_and_meta</span> <span class="o">=</span> <span class="n">gene_ex_filt_PCs</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">gene_ex_metaData</span><span class="p">,</span> <span class="n">right_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">left_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -13442,7 +13470,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_PCs_and_meta</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -13458,7 +13486,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[29]:</div>
+<div class="prompt output_prompt">Out[27]:</div>
 
 
 
@@ -13515,7 +13543,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
       <td>-0.019014</td>
       <td>-0.009849</td>
       <td>-0.038982</td>
-      <td>0.007620</td>
+      <td>0.007621</td>
       <td>-0.017875</td>
       <td>...</td>
       <td>0</td>
@@ -13540,7 +13568,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
       <td>0.005563</td>
       <td>-0.044977</td>
       <td>-0.050277</td>
-      <td>0.016589</td>
+      <td>0.016590</td>
       <td>...</td>
       <td>0</td>
       <td>P-GEUV-5</td>
@@ -13564,7 +13592,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
       <td>-0.032630</td>
       <td>0.051308</td>
       <td>0.218681</td>
-      <td>-0.096277</td>
+      <td>-0.096276</td>
       <td>...</td>
       <td>0</td>
       <td>P-GEUV-5</td>
@@ -13600,7 +13628,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -13621,7 +13649,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[30]:</div>
+<div class="prompt output_prompt">Out[28]:</div>
 
 
 
@@ -13663,7 +13691,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_PCs_and_meta_tmp</span> <span class="o">=</span> <span class="n">gene_ex_filt_PCs_and_meta</span><span class="p">[(</span><span class="n">gene_ex_filt_PCs_and_meta</span><span class="p">[</span><span class="s2">&quot;Factor Value[ancestry category]&quot;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;Yoruba&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">gene_ex_filt_PCs_and_meta</span><span class="p">[</span><span class="s2">&quot;Factor Value[ancestry category]&quot;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;Utah&quot;</span><span class="p">)]</span>
@@ -13724,7 +13752,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[31]:</div>
+<div class="prompt output_prompt">Out[29]:</div>
 
 
 
@@ -13765,7 +13793,7 @@ This is biologically doesnt make sense as there will be around ~15000 genes expr
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -13877,7 +13905,7 @@ zcat  gencode.v19.annotation.gtf.gz | grep -v "^#" | awk -v OFS="\t" '{ if ($3==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gencode_v19_tss</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;gencode.v19.annotation.gtf.tss.bed&quot;</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -13892,7 +13920,7 @@ zcat  gencode.v19.annotation.gtf.gz | grep -v "^#" | awk -v OFS="\t" '{ if ($3==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gencode_v19_tss</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -13908,7 +13936,7 @@ zcat  gencode.v19.annotation.gtf.gz | grep -v "^#" | awk -v OFS="\t" '{ if ($3==
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[34]:</div>
+<div class="prompt output_prompt">Out[32]:</div>
 
 
 
@@ -13981,7 +14009,7 @@ zcat  gencode.v19.annotation.gtf.gz | grep -v "^#" | awk -v OFS="\t" '{ if ($3==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gencode_v19_tss</span><span class="p">[</span><span class="s2">&quot;geneID&quot;</span><span class="p">]]))</span>
@@ -14026,7 +14054,7 @@ Unique geneIDs after stripping
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gencode_v19_tss</span><span class="p">[</span><span class="s2">&quot;geneID&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gencode_v19_tss</span><span class="p">[</span><span class="s2">&quot;geneID&quot;</span><span class="p">]]</span>
@@ -14040,7 +14068,7 @@ Unique geneIDs after stripping
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gencode_v19_tss</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -14056,7 +14084,7 @@ Unique geneIDs after stripping
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[37]:</div>
+<div class="prompt output_prompt">Out[35]:</div>
 
 
 
@@ -14127,10 +14155,12 @@ Unique geneIDs after stripping
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_wTSS</span> <span class="o">=</span> <span class="n">gencode_v19_tss</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">gene_ex_filt</span><span class="p">,</span> <span class="n">right_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">left_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
+<span class="n">gene_ex_filt_wTSS</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gene_ex_filt_wTSS</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]]</span>
+<span class="n">gene_ex_filt_wTSS</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;tss&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14140,7 +14170,7 @@ Unique geneIDs after stripping
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_wTSS</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -14156,7 +14186,7 @@ Unique geneIDs after stripping
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[39]:</div>
+<div class="prompt output_prompt">Out[37]:</div>
 
 
 
@@ -14180,7 +14210,7 @@ Unique geneIDs after stripping
     <tr style="text-align: right;">
       <th></th>
       <th>chr</th>
-      <th>start</th>
+      <th>tss</th>
       <th>end</th>
       <th>geneID</th>
       <th>HG00096</th>
@@ -14205,7 +14235,7 @@ Unique geneIDs after stripping
   <tbody>
     <tr>
       <th>ENSG00000227232</th>
-      <td>chr1</td>
+      <td>1</td>
       <td>29806</td>
       <td>29806</td>
       <td>ENSG00000227232</td>
@@ -14229,7 +14259,7 @@ Unique geneIDs after stripping
     </tr>
     <tr>
       <th>ENSG00000268903</th>
-      <td>chr1</td>
+      <td>1</td>
       <td>135895</td>
       <td>135895</td>
       <td>ENSG00000268903</td>
@@ -14253,7 +14283,7 @@ Unique geneIDs after stripping
     </tr>
     <tr>
       <th>ENSG00000269981</th>
-      <td>chr1</td>
+      <td>1</td>
       <td>137965</td>
       <td>137965</td>
       <td>ENSG00000269981</td>
@@ -14289,7 +14319,7 @@ Unique geneIDs after stripping
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt</span><span class="o">.</span><span class="n">shape</span>
@@ -14305,7 +14335,7 @@ Unique geneIDs after stripping
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[40]:</div>
+<div class="prompt output_prompt">Out[38]:</div>
 
 
 
@@ -14322,7 +14352,7 @@ Unique geneIDs after stripping
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_wTSS</span><span class="o">.</span><span class="n">shape</span>
@@ -14338,7 +14368,7 @@ Unique geneIDs after stripping
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[41]:</div>
+<div class="prompt output_prompt">Out[39]:</div>
 
 
 
@@ -14362,13 +14392,502 @@ Unique geneIDs after stripping
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">_sample_names</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;sampleIDs.txt&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">gene_ex_filt</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">_sample_names</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+    <span class="n">_sample_names</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+<span class="n">_sample_names</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Lets-continue-this-analysis-by-loading-Genotypes-and-exploring-Genotype-information-and-mapping-QTLs.-To-be-continued-.-.-.">Lets continue this analysis by loading Genotypes and exploring Genotype information and mapping QTLs. To be continued . . .<a class="anchor-link" href="#Lets-continue-this-analysis-by-loading-Genotypes-and-exploring-Genotype-information-and-mapping-QTLs.-To-be-continued-.-.-.">&#182;</a></h4>
+<p>Lets process the vcf file we downloaded. Subset the vcf files to the samples from sampleIDs.txt and keep a MAF cutoff 0f 5% and remove missing genotypes</p>
+
+<pre><code>plink --memory 20000 --geno 0.01 --maf 0.05 --keep-fam sampleIDs.txt --vcf GEUVADIS.chr1.PH1PH2_465.IMPFRQFILT_BIALLELIC_PH.annotv2.genotypes.vcf.gz --recode vcf-iid --out geuvadis-chr1
+
+plink --make-bed --vcf geuvadis-chr1.vcf --out geuvadis_chr1</code></pre>
+
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Use tensorQTL functions to load genotypes.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">tensorqtl</span>
+<span class="kn">from</span> <span class="nn">tensorqtl</span> <span class="k">import</span> <span class="n">genotypeio</span><span class="p">,</span> <span class="n">cis</span><span class="p">,</span> <span class="n">trans</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plink_prefix_path</span> <span class="o">=</span> <span class="s1">&#39;geuvadis_chr1&#39;</span>
+<span class="n">pr</span> <span class="o">=</span> <span class="n">genotypeio</span><span class="o">.</span><span class="n">PlinkReader</span><span class="p">(</span><span class="n">plink_prefix_path</span><span class="p">)</span>
+<span class="n">genotype_df</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">load_genotypes</span><span class="p">()</span>
+<span class="n">variant_df</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">bim</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;snp&#39;</span><span class="p">)[[</span><span class="s1">&#39;chrom&#39;</span><span class="p">,</span> <span class="s1">&#39;pos&#39;</span><span class="p">]]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Mapping files: 100%|██████████| 3/3 [00:00&lt;00:00,  3.15it/s]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The above snippet read the genotypes and created a dataframe of genotypes across samples, <code>genotype_df</code> and another dataframe of variant positions, <code>variant_df</code></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Lets sort the samples in genotype_df to match with the gene expression matrix</span>
+<span class="n">genotype_df</span> <span class="o">=</span> <span class="n">genotype_df</span><span class="p">[</span><span class="n">gene_ex_filt</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">genotype_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[44]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>iid</th>
+      <th>HG00096</th>
+      <th>HG00097</th>
+      <th>HG00099</th>
+      <th>HG00100</th>
+      <th>HG00101</th>
+      <th>HG00102</th>
+      <th>HG00103</th>
+      <th>HG00104</th>
+      <th>HG00105</th>
+      <th>HG00106</th>
+      <th>...</th>
+      <th>NA19214</th>
+      <th>NA19222</th>
+      <th>NA19223</th>
+      <th>NA19225</th>
+      <th>NA19235</th>
+      <th>NA19236</th>
+      <th>NA19247</th>
+      <th>NA19248</th>
+      <th>NA19256</th>
+      <th>NA19257</th>
+    </tr>
+    <tr>
+      <th>snp</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>snp_1_52238</th>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>...</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>snp_1_55164</th>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>2 rows × 462 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">genotype_df</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[45]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(524759, 462)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">variant_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[46]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>chrom</th>
+      <th>pos</th>
+    </tr>
+    <tr>
+      <th>snp</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>snp_1_52238</th>
+      <td>1</td>
+      <td>52238</td>
+    </tr>
+    <tr>
+      <th>snp_1_55164</th>
+      <td>1</td>
+      <td>55164</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets subset the gene expression matrix to chromosome 1 and then split the data frame to gene expression values <code>gene_ex_filt_wTSS_chr1_pheno_df</code> and tss positions, <code>gene_ex_filt_wTSS_chr1_pos_df</code>, similar to that of genotype_df and genotype_pos.</p>
+<p>This may look a bit circular, to merge gene expression with TSS file and then split. You can follow any method that you prefer.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_wTSS_chr1</span> <span class="o">=</span> <span class="n">gene_ex_filt_wTSS</span><span class="p">[</span><span class="n">gene_ex_filt_wTSS</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;1&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gene_ex_filt_wTSS_chr1_pos_df</span> <span class="o">=</span> <span class="n">gene_ex_filt_wTSS_chr1</span><span class="p">[[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span><span class="s2">&quot;tss&quot;</span><span class="p">,</span><span class="s2">&quot;end&quot;</span><span class="p">]]</span>
+<span class="n">gene_ex_filt_wTSS_chr1_pheno_df</span> <span class="o">=</span> <span class="n">gene_ex_filt_wTSS_chr1</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geneID&quot;</span><span class="p">,</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span><span class="s2">&quot;tss&quot;</span><span class="p">,</span><span class="s2">&quot;end&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cis_df</span> <span class="o">=</span> <span class="n">cis</span><span class="o">.</span><span class="n">map_cis</span><span class="p">(</span><span class="n">genotype_df</span><span class="p">,</span> <span class="n">variant_df</span><span class="p">,</span>
+                <span class="n">gene_ex_filt_wTSS_chr1_pheno_df</span><span class="p">,</span>
+                <span class="n">gene_ex_filt_wTSS_chr1_pos_df</span><span class="p">,</span>
+               <span class="n">covariates_df</span><span class="o">=</span><span class="n">gene_ex_filt_PCs</span><span class="p">)</span>
+
+<span class="n">cis_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;pval_beta&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cis_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Lets plot some QTLs.</span>
+<span class="c1">#Lets define a function to plot the QTLs. This is very basic function with hardcoded dataframes from this notebook. This needs to be improved to make ir general purpose</span>
+
+<span class="k">def</span> <span class="nf">plotQTLs</span><span class="p">(</span><span class="n">GeneID</span><span class="p">,</span> <span class="n">Genotype</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">_tmp_gene_ex</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gene_ex_filt_wTSS_chr1_pheno_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">GeneID</span><span class="p">])</span>
+    <span class="n">_tmp_genotypes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">genotype_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">Genotype</span><span class="p">])</span>
+    <span class="n">_tmp_df</span> <span class="o">=</span> <span class="n">_tmp_gene_ex</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">_tmp_genotypes</span><span class="p">,</span> <span class="n">left_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">_tmp_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GeneEx&quot;</span><span class="p">,</span><span class="s2">&quot;Genotype&quot;</span><span class="p">]</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Genotype&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;GeneEx&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">_tmp_df</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">swarmplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;Genotype&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;GeneEx&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">_tmp_df</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Genotype&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Gene Expression(TPM) </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">+</span><span class="n">GeneID</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plotQTLs</span><span class="p">(</span><span class="s2">&quot;ENSG00000162441&quot;</span><span class="p">,</span><span class="s2">&quot;snp_1_10003320&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div>
     </div>
   </div>
